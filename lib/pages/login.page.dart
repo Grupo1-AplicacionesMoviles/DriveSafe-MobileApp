@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/auth.service.dart';
 
 class LoginPage extends StatefulWidget {
@@ -18,16 +18,20 @@ class _LoginPageState extends State<LoginPage> {
     String gmail = _gmailController.text;
     String password = _passwordController.text;
 
-    var response = await authService.login(
+    var responseLogin = await authService.login(
       email: gmail,
       password: password,
     );
 
-    if (response.statusCode == 200) {
-      print('Login successful');
-      Navigator.pushNamed(context, '/home');
+    if (responseLogin.statusCode == 200) {
+      var responseType = await authService.getRole();
+      print('role: '+ responseType.body);
+      if (responseType.body.replaceAll('"', '') == "owner")
+        Navigator.pushNamed(context, '/home-owner');
+      else
+      Navigator.pushNamed(context, '/home-tenant');
     } else {
-      print('Login failed: ${response.body}');
+      print('Login failed: ${responseLogin.body}');
     }
   }
 

@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 
-class MainMenuPage extends StatelessWidget {
-  const MainMenuPage({super.key});
+class HomeOwner extends StatelessWidget {
+  const HomeOwner({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context){
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Home'),
+        title: const Center(
+            child: Text('Home')
+        ),
         leading: IconButton(
           icon: const Icon(Icons.menu),
           onPressed: () {
@@ -22,7 +24,7 @@ class MainMenuPage extends StatelessWidget {
         ],
       ),
       body: const Center(
-        child: Text('Bienvenido a la página de inicio'),
+        child: Text('Welcome to the owner home page'),
       ),
     );
   }

@@ -1,6 +1,8 @@
 import 'package:drivesafe_mobile_application/pages/login.page.dart';
 import 'package:drivesafe_mobile_application/pages/register.page.dart';
-import 'package:drivesafe_mobile_application/pages/main.menu.page.dart';
+import 'package:drivesafe_mobile_application/pages/owner-home.page.dart';
+import 'package:drivesafe_mobile_application/pages/tenant-home.page.dart';
+import 'package:drivesafe_mobile_application/pages/find-car.page.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -22,7 +24,9 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (context) => const LoginPage(),
         '/register': (context) => const RegisterPage(),
-        '/home': (context) => const MainMenuPage(),
+        '/home-tenant': (context) => const HomeTenant(),
+        '/home-owner': (context) => const HomeOwner(),
+        '/find-car': (context) => const FindCar(),
       },
     );
   }
