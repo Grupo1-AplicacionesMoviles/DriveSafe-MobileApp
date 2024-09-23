@@ -7,7 +7,7 @@ class HomeOwner extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Center(child: Text('Home')),
+        title: const Center(child: Text('Rent')),
         leading: Builder(
           builder: (context) => IconButton(
             icon: const Icon(Icons.menu),
@@ -48,12 +48,19 @@ class HomeOwner extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.request_page),
+              leading: const Icon(Icons.notification_add),
               title: const Text('Notifications'),
               onTap: () {
                 Navigator.pushNamed(context, '/notifications');
               },
             ),
+            ListTile(
+              leading: const Icon(Icons.request_page),
+              title: const Text('Requests'),
+              onTap: () {
+                Navigator.pushNamed(context, '/request-owner');
+              },
+            )
           ],
         ),
       ),
