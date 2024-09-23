@@ -77,6 +77,40 @@ class _FindCarState extends State<FindCar> {
           ),
         ],
       ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(context, '/home-tenant');
+              },
+              child: Image.asset('assets/images/Drive-Safe-Logo.png'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.directions_car),
+              title: const Text('Find a car'),
+              onTap: () {
+                Navigator.pushNamed(context, '/find-car');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.build),
+              title: const Text('Maintenance'),
+              onTap: () {
+                Navigator.pushNamed(context, '/maintenance');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.request_page),
+              title: const Text('Requests'),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -87,7 +121,7 @@ class _FindCarState extends State<FindCar> {
                 alignment: Alignment.topLeft,
                 child: ElevatedButton(
                   onPressed: _toggleFilters,
-                  child: const Text('Filtros'),
+                  child: const Text('Filters'),
                 ),
               ),
             if (_showFilters) ...[

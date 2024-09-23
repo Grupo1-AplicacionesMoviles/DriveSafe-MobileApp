@@ -57,8 +57,10 @@ class HomeTenant extends StatelessWidget {
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.only(top: 20.0), // Ajustar el padding para cambiar la posición
+            GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(context, '/home-tenant');
+              },
               child: Image.asset('assets/images/Drive-Safe-Logo.png'),
             ),
             ListTile(
@@ -72,7 +74,7 @@ class HomeTenant extends StatelessWidget {
               leading: const Icon(Icons.build),
               title: const Text('Maintenance'),
               onTap: () {
-                Navigator.pop(context);
+                Navigator.pushNamed(context, '/maintenance');
               },
             ),
             ListTile(
