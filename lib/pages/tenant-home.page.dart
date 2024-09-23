@@ -81,7 +81,7 @@ class HomeTenant extends StatelessWidget {
               leading: const Icon(Icons.request_page),
               title: const Text('Requests'),
               onTap: () {
-                Navigator.pop(context);
+                Navigator.pushNamed(context, '/requests');
               },
             ),
           ],

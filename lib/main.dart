@@ -1,7 +1,11 @@
 import 'package:drivesafe_mobile_application/pages/login.page.dart';
 import 'package:drivesafe_mobile_application/pages/maintenance.page.dart';
+import 'package:drivesafe_mobile_application/pages/notifications.page.dart';
+import 'package:drivesafe_mobile_application/pages/register-new-car.page.dart';
 import 'package:drivesafe_mobile_application/pages/register.page.dart';
 import 'package:drivesafe_mobile_application/pages/owner-home.page.dart';
+import 'package:drivesafe_mobile_application/pages/rent.page.dart';
+import 'package:drivesafe_mobile_application/pages/requests.page.dart';
 import 'package:drivesafe_mobile_application/pages/tenant-home.page.dart';
 import 'package:drivesafe_mobile_application/pages/find-car.page.dart';
 import 'package:flutter/material.dart';
@@ -29,6 +33,10 @@ class MyApp extends StatelessWidget {
         '/home-owner': (context) => const HomeOwner(),
         '/find-car': (context) => const FindCar(),
         '/maintenance': (context) => const MaintenancePage(),
+        '/requests': (context) => const RequestsPage(),
+        '/register-new-car': (context) => const RegisterNewCar(),
+        '/rent': (context) => const RentPage(),
+        '/notifications': (context) => const NotificationPage(),
       },
     );
   }
