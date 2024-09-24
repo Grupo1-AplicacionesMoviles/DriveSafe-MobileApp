@@ -1,43 +1,48 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:drivesafe_mobile_application/services/vehicle.service.dart';
+import 'package:drivesafe_mobile_application/models/VehicleModel.dart';
+import 'package:drivesafe_mobile_application/services/config.dart';
 
-class HomeTenant extends StatelessWidget {
+class HomeTenant extends StatefulWidget {
   const HomeTenant({super.key});
 
-  final List<Map<String, String>> vehicles = const [
-    {
-      'brand': 'Toyota',
-      'model': 'Corolla',
-      'imageUrl': 'https://www.mitsuiautomotriz.com/sites/default/files/2023-02/CONOCELOS_TOYOTA_Corolla-01_0.jpg',
-    },
-    {
-      'brand': 'Honda',
-      'model': 'Civic',
-      'imageUrl': 'https://d275w7g9tp258u.cloudfront.net/wp-content/uploads/2022/09/honda_civic.png',
-    },
-    {
-      'brand': 'Ford',
-      'model': 'Mustang',
-      'imageUrl': 'https://live.dealer-asset.co/images/br1168/product/paintSwatch/vehicle/ford-azul-oscuro.png?s=1024',
-    },
-    {
-      'brand': 'Chevrolet',
-      'model': 'Camaro',
-      'imageUrl': 'https://d1extt4q0kbmr.cloudfront.net/wp-content/uploads/2019/11/camaro-interior1.png',
-    },
-    {
-      'brand': 'BMW',
-      'model': 'M3',
-      'imageUrl': 'https://hips.hearstapps.com/hmg-prod/images/2025-bmw-m3-110-66562ddceaf59.jpg?crop=0.752xw:0.501xh;0.105xw,0.331xh&resize=1200:*',
-    },
-  ];
+  @override
+  _HomeTenantState createState() => _HomeTenantState();
+}
+
+class _HomeTenantState extends State<HomeTenant> {
+  final VehicleService _vehicleService = VehicleService();
+  List<VehicleModel> vehicles = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchVehicles();
+  }
+
+  Future<void> _fetchVehicles() async {
+    final response = await _vehicleService.getVehicles();
+    if (response.statusCode == 200) {
+      final List<dynamic> responseBody = jsonDecode(response.body);
+      setState(() {
+        vehicles = responseBody.map((json) => VehicleModel.fromJson(json)).toList();
+      });
+    } else {
+      // Handle error
+      print('Failed to load vehicles');
+    }
+  }
+
+  String _buildImageUrl(String filename) {
+    return '${Config.baseUrl}/api/File/Image/$filename';
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Center(
-          child: Text('Home')
-        ),
+        title: const Center(child: Text('Home')),
         leading: Builder(
           builder: (context) => IconButton(
             icon: const Icon(Icons.menu),
@@ -92,6 +97,7 @@ class HomeTenant extends StatelessWidget {
         itemCount: vehicles.length,
         itemBuilder: (context, index) {
           final vehicle = vehicles[index];
+          final imageUrl = _buildImageUrl(vehicle.urlImage);
           return Card(
             margin: const EdgeInsets.symmetric(vertical: 8.0),
             child: Padding(
@@ -103,7 +109,7 @@ class HomeTenant extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
-                          vehicle['brand']!,
+                          vehicle.brand,
                           style: const TextStyle(
                             fontSize: 18.0,
                             fontWeight: FontWeight.bold,
@@ -111,7 +117,7 @@ class HomeTenant extends StatelessWidget {
                         ),
                         const SizedBox(height: 8.0),
                         Text(
-                          vehicle['model']!,
+                          vehicle.model,
                           style: const TextStyle(
                             fontSize: 16.0,
                           ),
@@ -119,16 +125,13 @@ class HomeTenant extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(width: 16.0),
-                  Image.network(
-                    vehicle['imageUrl']!,
-                    width: 100.0,
-                    height: 100.0,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return const Icon(Icons.error);
-                    },
-                  ),
+                  if (imageUrl.isNotEmpty)
+                    Image.network(
+                      imageUrl,
+                      width: 100,
+                      height: 100,
+                      fit: BoxFit.cover,
+                    ),
                 ],
               ),
             ),

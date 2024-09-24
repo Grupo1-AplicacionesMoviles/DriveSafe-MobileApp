@@ -1,7 +1,10 @@
+import 'dart:convert';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:drivesafe_mobile_application/services/vehicle.service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 class RegisterNewCar extends StatefulWidget {
   const RegisterNewCar({super.key});
@@ -11,26 +14,72 @@ class RegisterNewCar extends StatefulWidget {
 }
 
 class _RegisterNewCarState extends State<RegisterNewCar> {
-  String? selectedBrand;
-  String? selectedModel;
+  final TextEditingController _brandController = TextEditingController();
+  final TextEditingController _modelController = TextEditingController();
+  final TextEditingController _maximumSpeedController = TextEditingController();
+  final TextEditingController _consumptionController = TextEditingController();
+  final TextEditingController _dimensionsController = TextEditingController();
+  final TextEditingController _weightController = TextEditingController();
+  final TextEditingController _carClassController = TextEditingController();
+  final TextEditingController _pickUpPlaceController = TextEditingController();
   String? selectedTransmission;
+  String? selectedTimeType;
   double rentPrice = 0;
-  PickedFile? image;
+  XFile? image;
 
   final ImagePicker _picker = ImagePicker();
+  final VehicleService _vehicleService = VehicleService();
 
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     setState(() {
-      image = pickedFile as PickedFile?;
+      image = pickedFile;
     });
+  }
+
+  Future<void> _registerCar() async {
+    if (image != null) {
+      final response = await _vehicleService.postImage(File(image!.path));
+      final responseBody = jsonDecode(response.body);
+      final String urlImage = responseBody['fileName'];
+
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+      Map<String, dynamic> decodedToken = JwtDecoder.decode(token!);
+      int ownerId = int.parse(decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/sid']);
+
+      print('urlImage: $urlImage');
+      print('ownerId: $ownerId');
+
+      final vehicleResponse = await _vehicleService.createVehicle(
+        brand: _brandController.text,
+        model: _modelController.text,
+        maximumSpeed: int.parse(_maximumSpeedController.text),
+        consumption: int.parse(_consumptionController.text),
+        dimensions: _dimensionsController.text,
+        weight: int.parse(_weightController.text),
+        carClass: _carClassController.text,
+        transmission: selectedTransmission!,
+        timeType: selectedTimeType!,
+        rentalCost: rentPrice.round(),
+        pickUpPlace: _pickUpPlaceController.text,
+        urlImage: urlImage,
+        rentStatus: 'Available',
+        ownerId: ownerId,
+      );
+
+      print('Vehicle creation response: ${vehicleResponse.statusCode}');
+      print('Vehicle creation response body: ${vehicleResponse.body}');
+    } else {
+      print('No image selected');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Center(child: Text('Rent')),
+        title: const Center(child: Text('Register new car')),
         leading: Builder(
           builder: (context) => IconButton(
             icon: const Icon(Icons.menu),
@@ -51,39 +100,32 @@ class _RegisterNewCarState extends State<RegisterNewCar> {
           padding: EdgeInsets.zero,
           children: <Widget>[
             GestureDetector(
-              onTap: () {
-                Navigator.pushNamed(context, '/home-owner');
-              },
-              child: Image.asset('assets/images/Drive-Safe-Logo.png'),
+              onTap: () {},
+              child: const UserAccountsDrawerHeader(
+                accountName: Text("User Name"),
+                accountEmail: Text("user@example.com"),
+                currentAccountPicture: CircleAvatar(
+                  backgroundColor: Colors.white,
+                  child: Text("U"),
+                ),
+              ),
             ),
             ListTile(
-              leading: const Icon(Icons.directions_car),
-              title: const Text('Register new car'),
-              onTap: () {
-                Navigator.pushNamed(context, '/register-new-car');
-              },
+              title: const Text('Home'),
+              onTap: () {},
             ),
             ListTile(
-              leading: const Icon(Icons.build),
-              title: const Text('Rents'),
-              onTap: () {
-                Navigator.pushNamed(context, '/rent');
-              },
+              title: const Text('Profile'),
+              onTap: () {},
             ),
             ListTile(
-              leading: const Icon(Icons.notification_add),
-              title: const Text('Notifications'),
-              onTap: () {
-                Navigator.pushNamed(context, '/notifications');
-              },
+              title: const Text('Settings'),
+              onTap: () {},
             ),
             ListTile(
-              leading: const Icon(Icons.request_page),
-              title: const Text('Requests'),
-              onTap: () {
-                Navigator.pushNamed(context, '/request-owner');
-              },
-            )
+              title: const Text('Logout'),
+              onTap: () {},
+            ),
           ],
         ),
       ),
@@ -96,61 +138,45 @@ class _RegisterNewCarState extends State<RegisterNewCar> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  DropdownButton<String>(
-                    value: selectedBrand,
-                    hint: const Text('Select Brand'),
-                    items: <String>['Brand 1', 'Brand 2', 'Brand 3']
-                        .map((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        selectedBrand = newValue;
-                      });
-                    },
+                  TextField(
+                    controller: _brandController,
+                    decoration: const InputDecoration(labelText: 'Brand'),
                   ),
-                  DropdownButton<String>(
-                    value: selectedModel,
-                    hint: const Text('Select Model'),
-                    items: <String>['Model 1', 'Model 2', 'Model 3']
-                        .map((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        selectedModel = newValue;
-                      });
-                    },
+                  TextField(
+                    controller: _modelController,
+                    decoration: const InputDecoration(labelText: 'Model'),
                   ),
                   const Text(
                     'Benefits',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  const TextField(
-                    decoration: InputDecoration(labelText: 'Top Speed'),
+                  TextField(
+                    controller: _maximumSpeedController,
+                    decoration: const InputDecoration(labelText: 'Top Speed'),
                   ),
-                  const TextField(
-                    decoration: InputDecoration(labelText: 'Consumption'),
+                  TextField(
+                    controller: _consumptionController,
+                    decoration: const InputDecoration(labelText: 'Consumption'),
                   ),
                   const Text(
                     'Dimensions',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  const TextField(
-                    decoration: InputDecoration(labelText: 'Large/Width/Height'),
+                  TextField(
+                    controller: _dimensionsController,
+                    decoration: const InputDecoration(labelText: 'Large/Width/Height'),
                   ),
                   const Text(
                     'Additionals',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  const TextField(
-                    decoration: InputDecoration(labelText: 'Class'),
+                  TextField(
+                    controller: _weightController,
+                    decoration: const InputDecoration(labelText: 'Weight'),
+                  ),
+                  TextField(
+                    controller: _carClassController,
+                    decoration: const InputDecoration(labelText: 'Class'),
                   ),
                   DropdownButton<String>(
                     value: selectedTransmission,
@@ -165,6 +191,22 @@ class _RegisterNewCarState extends State<RegisterNewCar> {
                     onChanged: (String? newValue) {
                       setState(() {
                         selectedTransmission = newValue;
+                      });
+                    },
+                  ),
+                  DropdownButton<String>(
+                    value: selectedTimeType,
+                    hint: const Text('Select Time Type'),
+                    items: <String>['Daily', 'Weekly', 'Monthly']
+                        .map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        selectedTimeType = newValue;
                       });
                     },
                   ),
@@ -188,8 +230,9 @@ class _RegisterNewCarState extends State<RegisterNewCar> {
                     'Location',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  const TextField(
-                    decoration: InputDecoration(labelText: 'Direction'),
+                  TextField(
+                    controller: _pickUpPlaceController,
+                    decoration: const InputDecoration(labelText: 'Direction'),
                   ),
                   const Text(
                     'Upload a picture',
@@ -203,14 +246,12 @@ class _RegisterNewCarState extends State<RegisterNewCar> {
                   const SizedBox(height: 16.0),
                   Center(
                     child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, '/rent');
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black,
-                        ),
-                        child: const Text('Register')
-                    )
+                      onPressed: _registerCar,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                      ),
+                      child: const Text('Register'),
+                    ),
                   ),
                 ],
               ),
