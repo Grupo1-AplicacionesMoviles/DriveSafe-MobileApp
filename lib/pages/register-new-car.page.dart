@@ -70,8 +70,25 @@ class _RegisterNewCarState extends State<RegisterNewCar> {
 
       print('Vehicle creation response: ${vehicleResponse.statusCode}');
       print('Vehicle creation response body: ${vehicleResponse.body}');
+
+      // Show SnackBar based on response status code
+      if (vehicleResponse.statusCode == 400) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Ha ocurrido un error durante el registro del vehículo.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Se ha registrado correctamente el vehículo.'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
     } else {
-      print('No image selected');
+      print('Seleccione una imagen para continuar.');
     }
   }
 
