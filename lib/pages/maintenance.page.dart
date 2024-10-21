@@ -107,7 +107,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
                         },
                       ),
                       const SizedBox(width: 16.0),
-                      Column(
+                      const Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: const <Widget>[
                           Text(
