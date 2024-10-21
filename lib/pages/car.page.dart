@@ -128,9 +128,9 @@ class CarPage extends StatelessWidget {
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                  // Acción para ver el contrato
+                  // Acción para solicitar renta
                 },
-                child: const Text('See Contract'),
+                child: const Text('Apply for rental'),
               ),
             ),
           ],
