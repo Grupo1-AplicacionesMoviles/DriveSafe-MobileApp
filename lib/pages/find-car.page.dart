@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:drivesafe_mobile_application/pages/car.page.dart';
 import 'package:drivesafe_mobile_application/services/vehicle.service.dart';
 import 'package:flutter/material.dart';
 
@@ -203,7 +204,14 @@ class _FindCarState extends State<FindCar> {
                           Center(
                             child: ElevatedButton(
                               onPressed: () {
-                                // Acción para ver el contrato
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => CarPage(
+                                      vehicle: vehicle, // Enviar datos del vehículo
+                                    ),
+                                  ),
+                                );
                               },
                               child: const Text('See Contract'),
                             ),

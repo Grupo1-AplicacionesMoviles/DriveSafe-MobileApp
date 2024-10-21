@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
         '/rent': (context) => const RentPage(),
         '/notifications': (context) => const NotificationPage(),
         '/request-owner': (context) => const RequestOwner(),
-        '/car-page': (context) => const CarPage(),
+        '/car-page': (context) => const CarPage(vehicle: {},),
       },
     );
   }
