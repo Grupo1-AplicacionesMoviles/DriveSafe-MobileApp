@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:drivesafe_mobile_application/services/vehicle.service.dart';
 import 'package:flutter/material.dart';
 
 class FindCar extends StatefulWidget {
@@ -8,44 +11,57 @@ class FindCar extends StatefulWidget {
 }
 
 class _FindCarState extends State<FindCar> {
-  double _price = 50;
-  String _rentTime = 'daily';
-  String _transmission = 'Automatic';
-  List<Map<String, String>> _filteredVehicles = [];
+  List<Map<String, dynamic>> _filteredVehicles = [];
   bool _showFilters = true;
+  bool _isLoading = true; // Para mostrar el estado de carga
+  final VehicleService _vehicleService = VehicleService(); // Instancia del servicio
 
-  final List<Map<String, String>> vehicles = const [
-    {
-      'brand': 'Toyota',
-      'model': 'Corolla',
-      'imageUrl': 'https://www.mitsuiautomotriz.com/sites/default/files/2023-02/CONOCELOS_TOYOTA_Corolla-01_0.jpg',
-    },
-    {
-      'brand': 'Honda',
-      'model': 'Civic',
-      'imageUrl': 'https://d275w7g9tp258u.cloudfront.net/wp-content/uploads/2022/09/honda_civic.png',
-    },
-    {
-      'brand': 'Ford',
-      'model': 'Mustang',
-      'imageUrl': 'https://live.dealer-asset.co/images/br1168/product/paintSwatch/vehicle/ford-azul-oscuro.png?s=1024',
-    },
-    {
-      'brand': 'Chevrolet',
-      'model': 'Camaro',
-      'imageUrl': 'https://d1extt4q0kbmr.cloudfront.net/wp-content/uploads/2019/11/camaro-interior1.png',
-    },
-    {
-      'brand': 'BMW',
-      'model': 'M3',
-      'imageUrl': 'https://hips.hearstapps.com/hmg-prod/images/2025-bmw-m3-110-66562ddceaf59.jpg?crop=0.752xw:0.501xh;0.105xw,0.331xh&resize=1200:*',
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _fetchVehicles();
+  }
+
+  void _fetchVehicles() async {
+    try {
+      final response = await _vehicleService.getVehicles();
+      if (response.statusCode == 200) {
+        final List<dynamic> vehiclesJson = jsonDecode(response.body);
+        setState(() {
+          _filteredVehicles = vehiclesJson.map((vehicle) {
+            return {
+              'brand': vehicle['Brand'],
+              'model': vehicle['Model'],
+              'imageUrl': vehicle['UrlImage'],
+              'maximumSpeed': vehicle['MaximumSpeed'],
+              'consumption': vehicle['Consumption'],
+              'dimensions': vehicle['Dimensions'],
+              'ownerId': vehicle['OwnerId'],
+              'rentalCost': vehicle['RentalCost'],
+            };
+          }).toList();
+          _isLoading = false; // Finaliza el estado de carga
+        });
+      } else {
+        // Manejo de error en caso de respuesta no exitosa
+        setState(() {
+          _isLoading = false;
+        });
+        print('Error: ${response.statusCode}');
+      }
+    } catch (e) {
+      // Manejo de excepciones
+      setState(() {
+        _isLoading = false;
+      });
+      print('Exception: $e');
+    }
+  }
 
   void _searchVehicles() {
     setState(() {
-      _filteredVehicles = vehicles;
       _showFilters = false;
+      // Filtrar vehículos por precio o cualquier otro criterio si es necesario
     });
   }
 
@@ -111,7 +127,9 @@ class _FindCarState extends State<FindCar> {
           ],
         ),
       ),
-      body: Padding(
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator()) // Indicador de carga
+          : Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -133,117 +151,10 @@ class _FindCarState extends State<FindCar> {
                 ),
               ),
               const SizedBox(height: 16.0),
-              Card(
-                margin: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      const TextField(
-                        decoration: InputDecoration(
-                          labelText: 'Location',
-                        ),
-                      ),
-                      const SizedBox(height: 16.0),
-                      Text('Price: \$${_price.toInt()}'),
-                      Slider(
-                        value: _price,
-                        min: 0,
-                        max: 100,
-                        divisions: 100,
-                        label: _price.round().toString(),
-                        onChanged: (double value) {
-                          setState(() {
-                            _price = value;
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 16.0),
-                      const Text('Rent Time:'),
-                      Row(
-                        children: <Widget>[
-                          Radio(
-                            value: 'Daily',
-                            groupValue: _rentTime,
-                            onChanged: (String? value) {
-                              setState(() {
-                                _rentTime = value!;
-                              });
-                            },
-                          ),
-                          const Text(
-                              'Daily',
-                              style: TextStyle(
-                                fontSize: 16.0,
-                              )
-                          ),
-                          const SizedBox(width: 20),
-                          Radio(
-                            value: 'Weekly',
-                            groupValue: _rentTime,
-                            onChanged: (String? value) {
-                              setState(() {
-                                _rentTime = value!;
-                              });
-                            },
-                          ),
-                          const Text(
-                              'Weekly',
-                              style: TextStyle(
-                                fontSize: 16.0,
-                              )
-                          ),
-                          const SizedBox(width: 20),
-                          Radio(
-                            value: 'Monthly',
-                            groupValue: _rentTime,
-                            onChanged: (String? value) {
-                              setState(() {
-                                _rentTime = value!;
-                              });
-                            },
-                          ),
-                          const Text(
-                              'Monthly',
-                              style: TextStyle(
-                                fontSize: 16.0,
-                              )
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16.0),
-                      const TextField(
-                        decoration: InputDecoration(
-                          labelText: 'Model',
-                        ),
-                      ),
-                      const SizedBox(height: 16.0),
-                      const Text('Transmission:'),
-                      DropdownButton<String>(
-                        value: _transmission,
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            _transmission = newValue!;
-                          });
-                        },
-                        items: <String>['Automatic', 'Manual']
-                            .map<DropdownMenuItem<String>>((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value),
-                          );
-                        }).toList(),
-                      ),
-                      const SizedBox(height: 16.0),
-                      Center(
-                        child: ElevatedButton(
-                          onPressed: _searchVehicles,
-                          child: const Text('Search'),
-                        ),
-                      ),
-                    ],
-                  ),
+              Center(
+                child: ElevatedButton(
+                  onPressed: _searchVehicles,
+                  child: const Text('Search'),
                 ),
               ),
             ],
@@ -268,20 +179,26 @@ class _FindCarState extends State<FindCar> {
                             ),
                           ),
                           const SizedBox(height: 8.0),
-                          Image.network(
-                            vehicle['imageUrl']!,
-                            width: 100.0,
-                            height: 100.0,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return const Icon(Icons.error);
-                            },
+                          SizedBox(
+                            width: 100,
+                            height: 100,
+                            child: Image.network(
+                              vehicle['imageUrl']!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return const Icon(Icons.error);
+                              },
+                            ),
                           ),
                           const SizedBox(height: 8.0),
-                          const Text('Top Speed: 200 km/h'),
-                          const Text('Consume: 10 L/100 km'),
-                          const Text('Dimensions: 4.5/1.8/1.4 m'),
-                          const Text('Owner: John Doe'),
+                          Text(
+                              'Top Speed: ${vehicle['MaximumSpeed']} km/h'),
+                          Text(
+                              'Consumption: ${vehicle['consumption']} L/100 km'),
+                          Text(
+                              'Dimensions: ${vehicle['dimensions']}'),
+                          Text('Owner ID: ${vehicle['ownerId']}'),
+                          Text('Rental Cost: \$${vehicle['rentalCost']}'),
                           const SizedBox(height: 8.0),
                           Center(
                             child: ElevatedButton(
