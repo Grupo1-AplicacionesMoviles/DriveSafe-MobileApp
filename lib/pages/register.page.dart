@@ -20,6 +20,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _gmailController = TextEditingController();
   final TextEditingController _birthDateController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -46,6 +47,14 @@ class _RegisterPageState extends State<RegisterPage> {
 
     int phoneInt = int.parse(phone);
 
+    if (_passwordController.text != _confirmPasswordController.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Las contraseñas no son iguales.'),
+          backgroundColor: Colors.red,),
+      );
+      return;
+    }
+
     var response = await authService.register(
       name: name,
       lastname: lastname,
@@ -57,10 +66,22 @@ class _RegisterPageState extends State<RegisterPage> {
     );
 
     if (response.statusCode == 200) {
-      print('Registration successful');
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Usuario registrado con éxito.'),
+            backgroundColor: Colors.greenAccent,));
       Navigator.pushNamed(context, '/login');
+    } else if (response.statusCode == 400) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Por favor asegúrate de llenar todos los datos.'),
+        backgroundColor: Colors.red,));
+    } else if (response.statusCode == 409) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Este email ya está en uso.'),
+            backgroundColor: Colors.red));
     } else {
-      print('Registration failed: ${response.body}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Ha ocurrido un error al crear el usuario.'),
+            backgroundColor: Colors.red));
     }
   }
 
@@ -80,87 +101,94 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  RadioListTile<String>(
-                    title: const Text('Arrendatario'),
-                    value: 'tenant',
-                    groupValue: _userType,
-                    onChanged: (value) {
-                      setState(() {
-                        _userType = value!;
-                      });
-                    },
-                  ),
-                  RadioListTile<String>(
-                    title: const Text('Arrendador'),
-                    value: 'owner',
-                    groupValue: _userType,
-                    onChanged: (value) {
-                      setState(() {
-                        _userType = value!;
-                      });
-                    },
-                  ),
-                  TextField(
-                    controller: _nameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Nombre',
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  children: <Widget>[
+                    RadioListTile<String>(
+                      title: const Text('Arrendatario'),
+                      value: 'tenant',
+                      groupValue: _userType,
+                      onChanged: (value) {
+                        setState(() {
+                          _userType = value!;
+                        });
+                      },
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  TextField(
-                    controller: _lastnameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Apellido',
+                    RadioListTile<String>(
+                      title: const Text('Arrendador'),
+                      value: 'owner',
+                      groupValue: _userType,
+                      onChanged: (value) {
+                        setState(() {
+                          _userType = value!;
+                        });
+                      },
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  TextFormField(
-                    controller: _birthDateController,
-                    decoration: const InputDecoration(
-                      labelText: 'Fecha de Nacimiento',
+                    TextField(
+                      controller: _nameController,
+                      decoration: const InputDecoration(
+                        labelText: 'Nombre',
+                      ),
                     ),
-                    readOnly: true,
-                    onTap: () => _selectDate(context),
-                  ),
-                  const SizedBox(height: 10),
-                  TextField(
-                    controller: _phoneController,
-                    decoration: const InputDecoration(
-                      labelText: 'Número de Teléfono',
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: _lastnameController,
+                      decoration: const InputDecoration(
+                        labelText: 'Apellido',
+                      ),
                     ),
-                    keyboardType: TextInputType.phone,
-                  ),
-                  const SizedBox(height: 10),
-                  TextField(
-                    controller: _gmailController,
-                    decoration: const InputDecoration(
-                      labelText: 'Gmail',
+                    const SizedBox(height: 10),
+                    TextFormField(
+                      controller: _birthDateController,
+                      decoration: const InputDecoration(
+                        labelText: 'Fecha de Nacimiento',
+                      ),
+                      readOnly: true,
+                      onTap: () => _selectDate(context),
                     ),
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                  const SizedBox(height: 10),
-                  TextField(
-                    controller: _passwordController,
-                    decoration: const InputDecoration(
-                      labelText: 'Contraseña',
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: _phoneController,
+                      decoration: const InputDecoration(
+                        labelText: 'Número de Teléfono',
+                      ),
+                      keyboardType: TextInputType.phone,
                     ),
-                    obscureText: true,
-                  ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _register,
-                      child: const Text('Completar Registro'),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: _gmailController,
+                      decoration: const InputDecoration(
+                        labelText: 'Gmail',
+                      ),
+                      keyboardType: TextInputType.emailAddress,
                     ),
-                  ),
-                ],
-
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: _passwordController,
+                      decoration: const InputDecoration(
+                        labelText: 'Contraseña',
+                      ),
+                      obscureText: true,
+                    ),
+                    TextField(
+                      controller: _confirmPasswordController,
+                      decoration: const InputDecoration(
+                        labelText: 'Repetir Contraseña',
+                      ),
+                      obscureText: true,
+                    ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _register,
+                        child: const Text('Completar Registro'),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-
             ),
           ),
         ),
