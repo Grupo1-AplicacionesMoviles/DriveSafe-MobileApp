@@ -126,11 +126,13 @@ class _HomeTenantState extends State<HomeTenant> {
                     ),
                   ),
                   if (imageUrl.isNotEmpty)
-                    Image.network(
-                      imageUrl,
+                    SizedBox(
                       width: 100,
                       height: 100,
-                      fit: BoxFit.cover,
+                      child: Image.network(
+                        imageUrl,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                 ],
               ),
