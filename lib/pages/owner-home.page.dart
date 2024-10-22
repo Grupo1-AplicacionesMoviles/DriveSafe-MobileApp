@@ -143,6 +143,13 @@ class _HomeOwnerState extends State<HomeOwner> {
                 }
               },
             ),
+            /*ListTile(
+              leading: const Icon(Icons.auto_fix_off_sharp),
+              title: const Text('Maintenances'),
+              onTap: () {
+                Navigator.pushNamed(context, '/maintenances-requests');
+              }
+            )*/
           ],
         ),
       ),
