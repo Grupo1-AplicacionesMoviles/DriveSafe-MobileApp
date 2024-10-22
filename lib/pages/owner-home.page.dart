@@ -1,7 +1,80 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
 
-class HomeOwner extends StatelessWidget {
-  const HomeOwner({super.key});
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:drivesafe_mobile_application/services/vehicle.service.dart';
+
+class HomeOwner extends StatefulWidget {
+  const HomeOwner({Key? key}) : super(key: key);
+
+  @override
+  _HomeOwnerState createState() => _HomeOwnerState();
+}
+
+class _HomeOwnerState extends State<HomeOwner> {
+  List<Map<String, dynamic>> _rentalRequests = [];
+  bool _isLoading = true;
+  int? ownerId;
+
+  @override
+  void initState() {
+    super.initState();
+    _getOwnerId(); // Obtener el ownerId del usuario autenticado
+  }
+
+  void _getOwnerId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int? storedOwnerId = prefs.getInt('ownerId'); // Obtener el ownerId desde SharedPreferences
+
+    if (storedOwnerId != null) {
+      setState(() {
+        ownerId = storedOwnerId;
+        print('Owner ID found: $ownerId'); // Para depuración
+        _fetchRentalRequests(); // Buscar solicitudes si se encuentra el ownerId
+      });
+    } else {
+      setState(() {
+        _isLoading = false; // Asegurarse de detener el cargador si no se encuentra el ownerId
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Owner ID not found, please login again.')),
+      );
+    }
+  }
+
+  void _fetchRentalRequests() async {
+    try {
+      setState(() {
+        _isLoading = true; // Iniciar cargador
+      });
+
+      final requests = await VehicleService().getAllRentalRequests().timeout(const Duration(seconds: 10));
+      print('Rental requests fetched: ${requests.length}'); // Imprimir la cantidad de solicitudes obtenidas
+
+      setState(() {
+        // Filtrar solo las solicitudes que pertenecen al arrendador actual
+        _rentalRequests = requests.where((request) => request['ownerId'] == ownerId).toList();
+        _isLoading = false; // Finalizar cargador
+        print('Filtered rental requests: ${_rentalRequests.length}'); // Imprimir cuántas solicitudes se filtraron
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false; // Finalizar cargador también en caso de error
+      });
+
+      if (e is TimeoutException) {
+        print('Error: Request timed out');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Request timed out. Please try again later.')),
+        );
+      } else {
+        print('Error fetching rental requests: $e'); // Imprimir el error para depuración
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load requests: $e')),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,15 +131,25 @@ class HomeOwner extends StatelessWidget {
               leading: const Icon(Icons.request_page),
               title: const Text('Requests'),
               onTap: () {
-                Navigator.pushNamed(context, '/request-owner');
+                if (ownerId != null) {
+                  _fetchRentalRequests();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Fetching rental requests...')),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Owner ID not found, unable to fetch requests.')),
+                  );
+                }
               },
-            )
+            ),
           ],
         ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Card(
               child: Padding(
@@ -75,72 +158,33 @@ class HomeOwner extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     const Text(
-                      'Lorem Ipsum',
+                      'Rental Requests',
                       style: TextStyle(
-                        fontSize: 24.0,
+                        fontSize: 22.0,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 16.0),
-                    Row(
-                      children: <Widget>[
-                        Expanded(
-                          child: TextField(
-                            decoration: const InputDecoration(
-                              hintText: 'Enter text',
+                    if (_isLoading)
+                      const Center(child: CircularProgressIndicator())
+                    else if (_rentalRequests.isEmpty)
+                      const Center(child: Text('No rental requests available.'))
+                    else
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: _rentalRequests.length,
+                        itemBuilder: (context, index) {
+                          final request = _rentalRequests[index];
+                          return Card(
+                            margin: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: ListTile(
+                              title: Text('Vehicle ID: ${request['vehicleId']}'),
+                              subtitle: Text('Tenant ID: ${request['tenantId']}'),
+                              trailing: Text(request['status']),
                             ),
-                          ),
-                        ),
-                        const SizedBox(width: 8.0),
-                        ElevatedButton(
-                          onPressed: () {},
-                          child: const Text('Share your car'),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16.0),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    const Text(
-                      'Notifications',
-                      style: TextStyle(
-                        fontSize: 20.0,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 16.0),
-                    for (int i = 0; i < 3; i++)
-                      Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: const <Widget>[
-                              Text(
-                                'Title',
-                                style: TextStyle(
-                                  fontSize: 18.0,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              SizedBox(height: 8.0),
-                              Text(
-                                'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-                                style: TextStyle(
-                                  fontSize: 16.0,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                          );
+                        },
                       ),
                   ],
                 ),
