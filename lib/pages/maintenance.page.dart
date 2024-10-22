@@ -1,4 +1,10 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:drivesafe_mobile_application/services/rent.service.dart';
+import 'package:drivesafe_mobile_application/services/vehicle.service.dart';
+import 'package:drivesafe_mobile_application/models/VehicleModel.dart';
 
 class MaintenancePage extends StatefulWidget {
   const MaintenancePage({super.key});
@@ -8,7 +14,44 @@ class MaintenancePage extends StatefulWidget {
 }
 
 class _MaintenancePageState extends State<MaintenancePage> {
-  String issue = 'Issue 1';
+  final RentService _rentService = RentService();
+  final VehicleService _vehicleService = VehicleService();
+  List<VehicleModel> vehicles = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchRentsAndVehicles();
+  }
+
+  Future<void> _fetchRentsAndVehicles() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+    Map<String, dynamic> decodedToken = JwtDecoder.decode(token!);
+    int tenantId = int.parse(decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/sid']);
+
+    final response = await _rentService.getByTenantId(id: tenantId);
+    print("Response Rent: ");
+    print(response);
+
+    if (response.statusCode == 200) {
+      final List<dynamic> rents = jsonDecode(response.body);
+      List<int> vehicleIds = rents.map<int>((rent) => rent['VehicleId'] as int).toList();
+
+      for (int vehicleId in vehicleIds) {
+        final vehicleResponse = await _vehicleService.getVehicleById(id: vehicleId);
+        if (vehicleResponse.statusCode == 200) {
+          final vehicleJson = jsonDecode(vehicleResponse.body);
+          setState(() {
+            vehicles.add(VehicleModel.fromJson(vehicleJson));
+          });
+        }
+      }
+    } else {
+      // Handle error
+      print('Failed to load rents');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,163 +109,57 @@ class _MaintenancePageState extends State<MaintenancePage> {
           ],
         ),
       ),
-      body: Padding(
+      body: ListView.builder(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            const Text(
-              'Maintenance',
-              style: TextStyle(
-                fontSize: 24.0,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16.0),
-            const Text(
-              'Lorem ipsum dolor sit amet, consectetur adipiscing elit. '
-                  'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-              style: TextStyle(
-                fontSize: 16.0,
-              ),
-            ),
-            const SizedBox(height: 16.0),
-            GestureDetector(
-              onTap: () {
-                _showForm(context);
-              },
-              child: Card(
-                margin: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    children: <Widget>[
+        itemCount: vehicles.length,
+        itemBuilder: (context, index) {
+          final vehicle = vehicles[index];
+          return GestureDetector(
+            onTap: () {
+              // Handle card tap
+            },
+            child: Card(
+              margin: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  children: <Widget>[
+                    if (vehicle.urlImage.isNotEmpty)
                       Image.network(
-                        'https://via.placeholder.com/100',
-                        width: 100.0,
-                        height: 100.0,
+                        vehicle.urlImage,
+                        width: 100,
+                        height: 100,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return const Icon(Icons.error);
-                        },
                       ),
-                      const SizedBox(width: 16.0),
-                      const Column(
+                    const SizedBox(width: 16.0),
+                    Expanded(
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const <Widget>[
+                        children: <Widget>[
                           Text(
-                            'Brand: Default Brand',
-                            style: TextStyle(
+                            vehicle.brand,
+                            style: const TextStyle(
                               fontSize: 18.0,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          SizedBox(height: 8.0),
+                          const SizedBox(height: 8.0),
                           Text(
-                            'Model: Default Model',
-                            style: TextStyle(
+                            vehicle.model,
+                            style: const TextStyle(
                               fontSize: 16.0,
                             ),
                           ),
                         ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
-          ],
-        ),
+          );
+        },
       ),
-    );
-  }
-
-  void _showForm(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: Card(
-            margin: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  const Text(
-                    'Car ID',
-                    style: TextStyle(
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8.0),
-                  const Text(
-                    'Owner Name',
-                    style: TextStyle(
-                      fontSize: 16.0,
-                    ),
-                  ),
-                  const SizedBox(height: 8.0),
-                  const Text(
-                    'Title',
-                    style: TextStyle(
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const TextField(),
-                  const SizedBox(height: 8.0),
-                  const Text(
-                    'Kind of issue',
-                    style: TextStyle(
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  DropdownButton<String>(
-                    value: issue,
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        issue = newValue!;
-                      });
-                    },
-                    items: <String>['Issue 1', 'Issue 2', 'Issue 3']
-                        .map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 8.0),
-                  const Text(
-                    'Description',
-                    style: TextStyle(
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const TextField(),
-                  const SizedBox(height: 16.0),
-                  Center(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
-                      ),
-                      child: const Text('Send'),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
     );
   }
 }

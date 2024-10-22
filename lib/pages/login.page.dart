@@ -1,5 +1,10 @@
+import 'dart:convert';
+
+import 'package:drivesafe_mobile_application/services/user.service.dart';
 import 'package:flutter/material.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../models/UserModel.dart';
 import '../services/auth.service.dart';
 
 class LoginPage extends StatefulWidget {
@@ -11,6 +16,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final AuthService authService = AuthService();
+  final UserService userService = UserService();
   final TextEditingController _gmailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
@@ -24,9 +30,19 @@ class _LoginPageState extends State<LoginPage> {
     );
 
     if (responseLogin.statusCode == 200) {
-      var responseType = await authService.getRole();
-      print('role: '+ responseType.body);
-      if (responseType.body.replaceAll('"', '') == "owner")
+
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+      Map<String, dynamic> decodedToken = JwtDecoder.decode(token!);
+      int Id = int.parse(decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/sid']);
+
+      var responseUser = await userService.getByUserId(id: Id);
+
+      UserModel user = UserModel.fromJson(jsonDecode(responseUser.body));
+      String role = user.type;
+
+      print('role: '+ role);
+      if (role == "owner")
         Navigator.pushNamed(context, '/home-owner');
       else
       Navigator.pushNamed(context, '/home-tenant');

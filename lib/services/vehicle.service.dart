@@ -81,4 +81,18 @@ class VehicleService {
     );
     return response;
   }
+
+  Future<http.Response> getVehicleById({required int id}) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+    var url = Uri.parse("${Config.baseUrl}/api/Vehicle/$id");
+    var response = await http.get(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token',
+      },
+    );
+    return response;
+  }
 }
