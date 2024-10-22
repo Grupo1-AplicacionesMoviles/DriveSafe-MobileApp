@@ -1,5 +1,6 @@
 import 'package:drivesafe_mobile_application/pages/login.page.dart';
 import 'package:drivesafe_mobile_application/pages/maintenance.page.dart';
+import 'package:drivesafe_mobile_application/pages/maintenances-request.page.dart';
 import 'package:drivesafe_mobile_application/pages/notifications.page.dart';
 import 'package:drivesafe_mobile_application/pages/register-new-car.page.dart';
 import 'package:drivesafe_mobile_application/pages/register.page.dart';
@@ -39,6 +40,7 @@ class MyApp extends StatelessWidget {
         '/rent': (context) => const RentPage(),
         '/notifications': (context) => const NotificationPage(),
         '/request-owner': (context) => const RequestOwner(),
+        '/maintenances-requests': (context) => const MaintenancesRequestPage()
       },
     );
   }

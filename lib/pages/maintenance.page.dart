@@ -5,6 +5,8 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:drivesafe_mobile_application/services/rent.service.dart';
 import 'package:drivesafe_mobile_application/services/vehicle.service.dart';
 import 'package:drivesafe_mobile_application/models/VehicleModel.dart';
+import 'package:drivesafe_mobile_application/services/config.dart';
+import 'package:drivesafe_mobile_application/pages/register-maintenance.page.dart';
 
 class MaintenancePage extends StatefulWidget {
   const MaintenancePage({super.key});
@@ -30,12 +32,9 @@ class _MaintenancePageState extends State<MaintenancePage> {
     Map<String, dynamic> decodedToken = JwtDecoder.decode(token!);
     int tenantId = int.parse(decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/sid']);
 
-    final response = await _rentService.getByTenantId(id: tenantId);
-    print("Response Rent: ");
-    print(response);
-
-    if (response.statusCode == 200) {
-      final List<dynamic> rents = jsonDecode(response.body);
+    final rentResponse = await _rentService.getByTenantId(id: tenantId);
+    if (rentResponse.statusCode == 200) {
+      final List<dynamic> rents = jsonDecode(rentResponse.body);
       List<int> vehicleIds = rents.map<int>((rent) => rent['VehicleId'] as int).toList();
 
       for (int vehicleId in vehicleIds) {
@@ -53,70 +52,30 @@ class _MaintenancePageState extends State<MaintenancePage> {
     }
   }
 
+  String _buildImageUrl(String filename) {
+    return '${Config.baseUrl}/api/File/Image/$filename';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Center(
-          child: Text('Maintenance'),
-        ),
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
-          ),
-        ),
-        actions: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.account_circle),
-            onPressed: () {},
-          ),
-        ],
-      ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            GestureDetector(
-              onTap: () {
-                Navigator.pushNamed(context, '/home-tenant');
-              },
-              child: Image.asset('assets/images/Drive-Safe-Logo.png'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.directions_car),
-              title: const Text('Find a car'),
-              onTap: () {
-                Navigator.pushNamed(context, '/find-car');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.build),
-              title: const Text('Maintenance'),
-              onTap: () {
-                Navigator.pushNamed(context, '/maintenance');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.request_page),
-              title: const Text('Requests'),
-              onTap: () {
-                Navigator.pushNamed(context, '/requests');
-              },
-            ),
-          ],
-        ),
+        title: const Center(child: Text('Maintenance')),
       ),
       body: ListView.builder(
         padding: const EdgeInsets.all(16.0),
         itemCount: vehicles.length,
         itemBuilder: (context, index) {
           final vehicle = vehicles[index];
+          final imageUrl = _buildImageUrl(vehicle.urlImage);
           return GestureDetector(
             onTap: () {
-              // Handle card tap
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => RegisterMaintenancePage(vehicle: vehicle),
+                ),
+              );
             },
             child: Card(
               margin: const EdgeInsets.symmetric(vertical: 8.0),
@@ -124,14 +83,6 @@ class _MaintenancePageState extends State<MaintenancePage> {
                 padding: const EdgeInsets.all(16.0),
                 child: Row(
                   children: <Widget>[
-                    if (vehicle.urlImage.isNotEmpty)
-                      Image.network(
-                        vehicle.urlImage,
-                        width: 100,
-                        height: 100,
-                        fit: BoxFit.cover,
-                      ),
-                    const SizedBox(width: 16.0),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -153,6 +104,13 @@ class _MaintenancePageState extends State<MaintenancePage> {
                         ],
                       ),
                     ),
+                    if (imageUrl.isNotEmpty)
+                      Image.network(
+                        imageUrl,
+                        width: 100,
+                        height: 100,
+                        fit: BoxFit.cover,
+                      ),
                   ],
                 ),
               ),
