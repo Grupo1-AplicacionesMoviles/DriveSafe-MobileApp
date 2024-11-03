@@ -102,7 +102,9 @@ class _FindCarState extends State<FindCar> {
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.account_circle),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pushNamed(context, '/profile-page');
+            },
           ),
         ],
       ),

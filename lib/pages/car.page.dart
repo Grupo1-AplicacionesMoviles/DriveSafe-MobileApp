@@ -55,7 +55,7 @@ class CarPage extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.account_circle),
             onPressed: () {
-              // Acción para perfil de usuario
+              Navigator.pushNamed(context, '/profile-page');
             },
           ),
         ],

@@ -119,7 +119,9 @@ class _RentPageState extends State<RentPage> {
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.account_circle),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pushNamed(context, '/profile-page');
+            },
           ),
         ],
       ),
