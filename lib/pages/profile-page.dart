@@ -13,33 +13,133 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfileState extends State<ProfilePage> {
-  final UserService _userService = UserService();
-  UserModel? _user;
+  final UserService userService = UserService();
+  UserModel? user;
+  TextEditingController editController = TextEditingController();
+  String? editingField;
+  DateTime? _selectedDate;
 
   @override
   void initState() {
     super.initState();
-    _loadUserData();
+    loadUserData();
   }
 
-  Future<void> _loadUserData() async {
+  Future<void> loadUserData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('token');
     Map<String, dynamic> decodedToken = JwtDecoder.decode(token!);
-    int UserId = int.parse(decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/sid']);
+    int userId = int.parse(decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/sid']);
 
     try {
-      final response = await _userService.getByUserId(id: UserId);
+      final response = await userService.getByUserId(id: userId);
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         setState(() {
-          _user = UserModel.fromJson(data);
+          user = UserModel.fromJson(data);
         });
       } else {
         print("Error al cargar los datos del usuario: ${response.statusCode}");
       }
     } catch (e) {
       print("Error en la carga de datos: $e");
+    }
+  }
+
+  void showEditDialog(String field, String currentValue) {
+    editController.text = currentValue;
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Editar $field'),
+          content: TextField(
+            controller: editController,
+            decoration: InputDecoration(labelText: 'Nuevo valor'),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancelar'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Guardar'),
+              onPressed: () {
+                saveField(field);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void showEditDialogName(String field, String currentName, String currentLastName) {
+    TextEditingController nameController = TextEditingController(text: currentName);
+    TextEditingController lastNameController = TextEditingController(text: currentLastName);
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Editar Nombre Completo'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'Nuevo Nombre'),
+              ),
+              TextField(
+                controller: lastNameController,
+                decoration: const InputDecoration(labelText: 'Nuevo Apellido'),
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancelar'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Guardar'),
+              onPressed: () {
+                saveFullName(nameController.text, lastNameController.text);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void saveField(String field) {
+    print('Guardar nuevo valor para $field: ${editController.text}');
+    editController.clear();
+  }
+
+  void saveFullName(String newName, String newLastName) {
+    print('Guardar nuevo nombre: $newName y nuevo apellido: $newLastName');
+    editController.clear();
+  }
+
+  Future<void> selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+      });
     }
   }
 
@@ -52,7 +152,7 @@ class _ProfileState extends State<ProfilePage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: _user == null
+        child: user == null
             ? const Center(child: CircularProgressIndicator())
             : Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -62,7 +162,7 @@ class _ProfileState extends State<ProfilePage> {
                 radius: 50,
                 backgroundColor: Colors.cyan,
                 child: Text(
-                  _user!.name[0] + _user!.lastName[0],
+                  user!.name[0] + user!.lastName[0],
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 24,
@@ -72,18 +172,18 @@ class _ProfileState extends State<ProfilePage> {
               ),
             ),
             const SizedBox(height: 20),
-            _buildEditableRow('Nombre Completo:', '${_user!.name} ${_user!.lastName}', () {
-              // Lógica para editar el nombre
+            buildEditableRow('Nombre Completo:', '${user!.name} ${user!.lastName}', () {
+              showEditDialogName('Nombre Completo', '${user!.name}', '${user!.lastName}');
             }),
             const SizedBox(height: 10),
-            _buildEditableRow('Correo:', _user!.gmail, null), // Sin ícono
+            buildEditableRow('Correo:', user!.gmail, null),
             const SizedBox(height: 10),
-            _buildEditableRow('Fecha de Nacimiento:', _user!.birthDate, () {
-              // Lógica para editar la fecha de nacimiento
+            buildEditableRow('Fecha de Nacimiento:', user!.birthDate, () {
+              selectDate(context);
             }),
             const SizedBox(height: 10),
-            _buildEditableRow('Número de Teléfono:', _user!.cellphone.toString(), () {
-              // Lógica para editar el número de teléfono
+            buildEditableRow('Número de Teléfono:', user!.cellphone.toString(), () {
+              showEditDialog('Número de Teléfono', user!.cellphone.toString());
             }),
             const SizedBox(height: 10),
             Text(
@@ -91,7 +191,7 @@ class _ProfileState extends State<ProfilePage> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             Text(
-              _user!.type == 'tenant' ? 'Arrendatario' : 'Arrendador', // Tipo de usuario
+              user!.type == 'tenant' ? 'Arrendatario' : 'Arrendador',
               style: TextStyle(fontSize: 16),
             ),
           ],
@@ -100,7 +200,7 @@ class _ProfileState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildEditableRow(String label, String value, VoidCallback? onEdit) {
+  Widget buildEditableRow(String label, String value, VoidCallback? onEdit) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
