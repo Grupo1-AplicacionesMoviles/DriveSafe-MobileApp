@@ -120,11 +120,13 @@ class _ProfileState extends State<ProfilePage> {
   }
 
   void saveField(String field) {
+    //acceder al user-service, modificarlo para que use el metodo update de la API
     print('Guardar nuevo valor para $field: ${editController.text}');
     editController.clear();
   }
 
   void saveFullName(String newName, String newLastName) {
+    //acceder al user-service, modificarlo para que use el metodo update de la API
     print('Guardar nuevo nombre: $newName y nuevo apellido: $newLastName');
     editController.clear();
   }
@@ -160,7 +162,7 @@ class _ProfileState extends State<ProfilePage> {
             Center(
               child: CircleAvatar(
                 radius: 50,
-                backgroundColor: Colors.cyan,
+                backgroundColor: Colors.orange,
                 child: Text(
                   user!.name[0] + user!.lastName[0],
                   style: const TextStyle(
