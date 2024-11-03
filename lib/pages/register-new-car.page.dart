@@ -52,6 +52,7 @@ class _RegisterNewCarState extends State<RegisterNewCar> {
       print('ownerId: $ownerId');
 
       final vehicleResponse = await _vehicleService.createVehicle(
+        id: 0,
         brand: _brandController.text,
         model: _modelController.text,
         maximumSpeed: int.parse(_maximumSpeedController.text),
@@ -65,13 +66,13 @@ class _RegisterNewCarState extends State<RegisterNewCar> {
         pickUpPlace: _pickUpPlaceController.text,
         urlImage: urlImage,
         rentStatus: 'Available',
-        ownerId: ownerId,
+        ownerId: ownerId
       );
 
       print('Vehicle creation response: ${vehicleResponse.statusCode}');
       print('Vehicle creation response body: ${vehicleResponse.body}');
+      Navigator.pushNamed(context, '/home-owner');
 
-      // Show SnackBar based on response status code
       if (vehicleResponse.statusCode == 400) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -117,32 +118,32 @@ class _RegisterNewCarState extends State<RegisterNewCar> {
           padding: EdgeInsets.zero,
           children: <Widget>[
             GestureDetector(
-              onTap: () {},
-              child: const UserAccountsDrawerHeader(
-                accountName: Text("User Name"),
-                accountEmail: Text("user@example.com"),
-                currentAccountPicture: CircleAvatar(
-                  backgroundColor: Colors.white,
-                  child: Text("U"),
-                ),
-              ),
+              onTap: () {
+                Navigator.pushNamed(context, '/home-owner');
+              },
+              child: Image.asset('assets/images/Drive-Safe-Logo.png'),
             ),
             ListTile(
-              title: const Text('Home'),
-              onTap: () {},
+              leading: const Icon(Icons.directions_car),
+              title: const Text('Register new car'),
+              onTap: () {
+                Navigator.pushNamed(context, '/register-new-car');
+              },
             ),
             ListTile(
-              title: const Text('Profile'),
-              onTap: () {},
+              leading: const Icon(Icons.build),
+              title: const Text('Rents'),
+              onTap: () {
+                Navigator.pushNamed(context, '/rent');
+              },
             ),
             ListTile(
-              title: const Text('Settings'),
-              onTap: () {},
-            ),
-            ListTile(
-              title: const Text('Logout'),
-              onTap: () {},
-            ),
+                leading: const Icon(Icons.auto_fix_off_sharp),
+                title: const Text('Maintenances'),
+                onTap: () {
+                  Navigator.pushNamed(context, '/maintenances-requests');
+                }
+            )
           ],
         ),
       ),

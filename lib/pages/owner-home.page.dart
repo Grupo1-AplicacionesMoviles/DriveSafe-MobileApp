@@ -48,20 +48,6 @@ class HomeOwner extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.notification_add),
-              title: const Text('Notifications'),
-              onTap: () {
-                Navigator.pushNamed(context, '/notifications');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.request_page),
-              title: const Text('Requests'),
-              onTap: () {
-                Navigator.pushNamed(context, '/request-owner');
-              },
-            ),
-            ListTile(
               leading: const Icon(Icons.auto_fix_off_sharp),
               title: const Text('Maintenances'),
               onTap: () {

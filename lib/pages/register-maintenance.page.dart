@@ -38,7 +38,7 @@ class _RegisterMaintenancePageState extends State<RegisterMaintenancePage> {
     );
 
     if (response.statusCode == 201) {
-      Navigator.pop(context);
+      Navigator.pushNamed(context, '/find-car');
     } else {
       // Handle error
       print('Failed to send maintenance');

@@ -1,31 +1,80 @@
+import 'dart:convert';
+import 'package:drivesafe_mobile_application/pages/read-request.page.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:drivesafe_mobile_application/services/vehicle.service.dart';
+import 'package:drivesafe_mobile_application/services/rent.service.dart';
+import 'package:drivesafe_mobile_application/models/VehicleModel.dart';
+import 'package:drivesafe_mobile_application/models/RentModel.dart';
+
+import '../services/config.dart';
 
 class RentPage extends StatefulWidget {
   const RentPage({super.key});
 
   @override
-  _RentPageStatePage createState() => _RentPageStatePage();
+  _RentPageState createState() => _RentPageState();
 }
 
-class _RentPageStatePage extends State<RentPage> {
-  void _showRequestDialog(BuildContext context) {
+class _RentPageState extends State<RentPage> {
+  final VehicleService _vehicleService = VehicleService();
+  final RentService _rentService = RentService();
+  List<VehicleModel> vehicles = [];
+  List<RentModel> rents = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchVehicles();
+  }
+
+  Future<void> _fetchVehicles() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+    Map<String, dynamic> decodedToken = JwtDecoder.decode(token!);
+    int ownerId = int.parse(decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/sid']);
+
+    final vehicleResponse = await _vehicleService.getVehicleByOwnerId(ownerId: ownerId);
+    if (vehicleResponse.statusCode == 200) {
+      final List<dynamic> vehicleList = jsonDecode(vehicleResponse.body);
+      setState(() {
+        vehicles = vehicleList.map((json) => VehicleModel.fromJson(json)).toList();
+      });
+    } else {
+      print('Failed to load vehicles');
+    }
+  }
+
+  Future<void> _showRentsDialog(BuildContext context, int vehicleId) async {
+    final rentResponse = await _rentService.getRents();
+    if (rentResponse.statusCode == 200) {
+      final List<dynamic> rentList = jsonDecode(rentResponse.body);
+      setState(() {
+        rents = rentList.map((json) => RentModel.fromJson(json)).where((rent) => rent.vehicleId == vehicleId).toList();
+      });
+    } else {
+      print('Failed to load rents');
+    }
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text(
-            'Request for this Car ID',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 24.0,
-            ),
-          ),
+          title: const Text('Rents for this Vehicle'),
           content: SingleChildScrollView(
             child: Column(
-              children: List.generate(4, (index) {
+              children: rents.isEmpty
+                  ? [const Text('No rents requests')]
+                  : rents.map((rent) {
                 return GestureDetector(
                   onTap: () {
-                    Navigator.pushNamed(context, '/request-owner');
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ReadRequestPage(rentId: rent.id),
+                      ),
+                    );
                   },
                   child: Card(
                     margin: const EdgeInsets.symmetric(vertical: 8.0),
@@ -33,32 +82,25 @@ class _RentPageStatePage extends State<RentPage> {
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const <Widget>[
-                          Text(
-                            'Car ID',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20.0,
-                            ),
-                          ),
-                          SizedBox(height: 8.0),
-                          Text(
-                            'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-                            style: TextStyle(
-                              fontSize: 16.0,
-                            ),
-                          ),
+                        children: <Widget>[
+                          Text('Status: ${rent.status}'),
+                          Text('Start Date: ${rent.startDate}'),
+                          Text('End Date: ${rent.endDate}'),
                         ],
                       ),
                     ),
                   ),
                 );
-              }),
+              }).toList(),
             ),
           ),
         );
       },
     );
+  }
+
+  String _buildImageUrl(String filename) {
+    return '${Config.baseUrl}/api/File/Image/$filename';
   }
 
   @override
@@ -106,134 +148,54 @@ class _RentPageStatePage extends State<RentPage> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.notification_add),
-              title: const Text('Notifications'),
-              onTap: () {
-                Navigator.pushNamed(context, '/notifications');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.request_page),
-              title: const Text('Requests'),
-              onTap: () {
-                Navigator.pushNamed(context, '/request-owner');
-              },
+                leading: const Icon(Icons.auto_fix_off_sharp),
+                title: const Text('Maintenances'),
+                onTap: () {
+                  Navigator.pushNamed(context, '/maintenances-requests');
+                }
             )
           ],
         ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              const Text(
-                'Rents',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 24.0,
-                ),
-              ),
-              const SizedBox(height: 8.0),
-              const Text(
-                'My posts',
-                style: TextStyle(
-                  fontSize: 16.0,
-                ),
-              ),
-              const SizedBox(height: 16.0),
-              GestureDetector(
-                onTap: () {
-                  _showRequestDialog(context);
-                },
-                child: Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        const Text(
-                          'Car Id',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20.0,
-                          ),
-                        ),
-                        const SizedBox(height: 8.0),
-                        const Text(
-                          'Car Model / Year',
-                          style: TextStyle(
-                            fontSize: 16.0,
-                          ),
-                        ),
-                        const SizedBox(height: 8.0),
-                        Container(
-                          height: 150.0,
-                          color: Colors.grey[300],
-                          child: const Center(
-                            child: Text('Vehicle Image'),
-                          ),
-                        ),
-                        const SizedBox(height: 8.0),
-                        const Text(
-                          'Status: Pending',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20.0,
-                          ),
-                        ),
-                        const SizedBox(height: 8.0),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: GestureDetector(
-                            onTap: () {
-                              // Acción para eliminar el post
-                            },
-                            child: const Text(
-                              'Delete post',
-                              style: TextStyle(
-                                decoration: TextDecoration.underline,
-                                color: Colors.blue,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16.0),
-              Card(
-                color: Colors.grey[300],
+        child: ListView.builder(
+          itemCount: vehicles.length,
+          itemBuilder: (context, index) {
+            final vehicle = vehicles[index];
+            final imageUrl = _buildImageUrl(vehicle.urlImage);
+            return GestureDetector(
+              onTap: () {
+                _showRentsDialog(context, vehicle.id);
+              },
+              child: Card(
+                margin: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      const Text(
-                        'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16.0),
-                      ElevatedButton(
-                        onPressed: () {
-                          // Acción para afiliar cuenta bancaria
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black, // Color de fondo negro
-                        ),
-                        child: const Text(
-                          'Afiliar cuenta Bancaria con MODO',
-                          style: TextStyle(color: Colors.white),
+                      Text(
+                        '${vehicle.brand} ${vehicle.model}',
+                        style: const TextStyle(
+                          fontSize: 18.0,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
+                      const SizedBox(height: 8.0),
+                      if (imageUrl.isNotEmpty)
+                        Image.network(
+                          imageUrl,
+                          width: 100,
+                          height: 100,
+                          fit: BoxFit.cover,
+                        ),
                     ],
                   ),
                 ),
               ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );

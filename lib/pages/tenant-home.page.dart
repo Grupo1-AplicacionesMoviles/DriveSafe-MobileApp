@@ -29,7 +29,6 @@ class _HomeTenantState extends State<HomeTenant> {
         vehicles = responseBody.map((json) => VehicleModel.fromJson(json)).toList();
       });
     } else {
-      // Handle error
       print('Failed to load vehicles');
     }
   }

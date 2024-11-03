@@ -7,6 +7,7 @@ import 'package:http_parser/http_parser.dart';
 
 class VehicleService {
   Future<http.Response> createVehicle({
+    required int id,
     required String brand,
     required String model,
     required int maximumSpeed,
@@ -32,6 +33,7 @@ class VehicleService {
         'Authorization': 'Bearer $token',
       },
       body: jsonEncode(<String, dynamic>{
+        'Id': null,
         'Brand': brand,
         'Model': model,
         'MaximumSpeed': maximumSpeed,
@@ -86,6 +88,20 @@ class VehicleService {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('token');
     var url = Uri.parse("${Config.baseUrl}/api/Vehicle/$id");
+    var response = await http.get(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token',
+      },
+    );
+    return response;
+  }
+
+  Future<http.Response> getVehicleByOwnerId({required int ownerId}) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+    var url = Uri.parse("${Config.baseUrl}/api/Vehicle/Owner/$ownerId");
     var response = await http.get(
       url,
       headers: <String, String>{

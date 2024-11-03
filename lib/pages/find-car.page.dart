@@ -4,6 +4,8 @@ import 'package:drivesafe_mobile_application/pages/car.page.dart';
 import 'package:drivesafe_mobile_application/services/vehicle.service.dart';
 import 'package:flutter/material.dart';
 
+import '../services/config.dart';
+
 class FindCar extends StatefulWidget {
   const FindCar({super.key});
 
@@ -23,6 +25,10 @@ class _FindCarState extends State<FindCar> {
     _fetchVehicles();
   }
 
+  String _buildImageUrl(String filename) {
+    return '${Config.baseUrl}/api/File/Image/$filename';
+  }
+
   void _fetchVehicles() async {
     try {
       final response = await _vehicleService.getVehicles();
@@ -31,8 +37,14 @@ class _FindCarState extends State<FindCar> {
         setState(() {
           _filteredVehicles = vehiclesJson.map((vehicle) {
             return {
+              'id': vehicle['Id'],
               'brand': vehicle['Brand'],
               'model': vehicle['Model'],
+              'weight': vehicle['Weight'],
+              'carClass': vehicle['CarClass'],
+              'transmission': vehicle['Transmission'],
+              'timeType': vehicle['TimeType'],
+              'pickUpPlace': vehicle['PickUpPlace'],
               'imageUrl': vehicle['UrlImage'],
               'maximumSpeed': vehicle['MaximumSpeed'],
               'consumption': vehicle['Consumption'],
@@ -165,6 +177,7 @@ class _FindCarState extends State<FindCar> {
                 itemCount: _filteredVehicles.length,
                 itemBuilder: (context, index) {
                   final vehicle = _filteredVehicles[index];
+                  final imageUrl = _buildImageUrl(vehicle['imageUrl']);
                   return Card(
                     margin: const EdgeInsets.symmetric(vertical: 8.0),
                     child: Padding(
@@ -184,7 +197,7 @@ class _FindCarState extends State<FindCar> {
                             width: 100,
                             height: 100,
                             child: Image.network(
-                              vehicle['imageUrl']!,
+                              imageUrl,
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) {
                                 return const Icon(Icons.error);
@@ -193,12 +206,11 @@ class _FindCarState extends State<FindCar> {
                           ),
                           const SizedBox(height: 8.0),
                           Text(
-                              'Top Speed: ${vehicle['MaximumSpeed']} km/h'),
+                              'Top Speed: ${vehicle['maximumSpeed']} km/h'),
                           Text(
                               'Consumption: ${vehicle['consumption']} L/100 km'),
                           Text(
                               'Dimensions: ${vehicle['dimensions']}'),
-                          Text('Owner ID: ${vehicle['ownerId']}'),
                           Text('Rental Cost: \$${vehicle['rentalCost']}'),
                           const SizedBox(height: 8.0),
                           Center(
@@ -208,7 +220,7 @@ class _FindCarState extends State<FindCar> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => CarPage(
-                                      vehicle: vehicle, // Enviar datos del vehículo
+                                      vehicle: vehicle,
                                     ),
                                   ),
                                 );

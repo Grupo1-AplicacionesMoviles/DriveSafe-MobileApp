@@ -1,17 +1,55 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../services/config.dart';
+import '../services/rent.service.dart';
 
 class CarPage extends StatelessWidget {
   final Map<String, dynamic> vehicle;
 
+
   const CarPage({Key? key, required this.vehicle}) : super(key: key);
+
+
+
+  String _buildImageUrl(String filename) {
+    return '${Config.baseUrl}/api/File/Image/$filename';
+  }
+
+  Future<void> _sendRental({required int ownerId, required int vehicleId, required String pickUpPlace}) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+    Map<String, dynamic> decodedToken = JwtDecoder.decode(token!);
+    int tenantId = int.parse(decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/sid']);
+
+    print('Tenant ID: $tenantId');
+    print('Owner ID: $ownerId');
+    print('Vehicle ID: $vehicleId');
+
+    final RentService _rentService = RentService();
+
+
+    final rentResponse = await _rentService.postRent(
+      status: 'Pending',
+      startDate: DateTime.now().toIso8601String().split('T').first,
+      endDate: DateTime.now().add(const Duration(days: 7)).toIso8601String().split('T').first,
+      vehicleId: vehicleId,
+      ownerId: ownerId,
+      tenantId: tenantId,
+      pickUpPlace: pickUpPlace,
+    );
+
+    print(rentResponse.body);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('${vehicle['brand']} ${vehicle['model']}'),
+        title: Text('${vehicle['brand']}  ${vehicle['model']}'),
         centerTitle: true,
         actions: <Widget>[
           IconButton(
@@ -26,12 +64,11 @@ class CarPage extends StatelessWidget {
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
-            // Opciones del menú lateral
             GestureDetector(
               onTap: () {
-                Navigator.pushNamed(context, '/home');
+                Navigator.pushNamed(context, '/home-tenant');
               },
-              child: Image.asset('assets/images/logo.png'),
+              child: Image.asset('assets/images/Drive-Safe-Logo.png'),
             ),
             ListTile(
               leading: const Icon(Icons.directions_car),
@@ -47,6 +84,13 @@ class CarPage extends StatelessWidget {
                 Navigator.pushNamed(context, '/maintenance');
               },
             ),
+            ListTile(
+              leading: const Icon(Icons.request_page),
+              title: const Text('Requests'),
+              onTap: () {
+                Navigator.pushNamed(context, '/requests');
+              },
+            ),
           ],
         ),
       ),
@@ -59,7 +103,7 @@ class CarPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '${vehicle['model']} / ${vehicle['year']}',
+                  '${vehicle['model']} / ${vehicle['brand']}',
                   style: const TextStyle(
                     fontSize: 22.0,
                     fontWeight: FontWeight.bold,
@@ -89,7 +133,7 @@ class CarPage extends StatelessWidget {
                 ),
                 child: vehicle['imageUrl'] != null
                     ? Image.network(
-                  vehicle['imageUrl'],
+                _buildImageUrl(vehicle['imageUrl']),
                   fit: BoxFit.cover,
                 )
                     : const Icon(Icons.image, size: 50),
@@ -128,7 +172,11 @@ class CarPage extends StatelessWidget {
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                  // Acción para solicitar renta
+                  _sendRental(
+                    ownerId: vehicle['ownerId'],
+                    vehicleId: vehicle['id'],
+                    pickUpPlace: vehicle['pickUpPlace'],
+                  );
                 },
                 child: const Text('Apply for rental'),
               ),

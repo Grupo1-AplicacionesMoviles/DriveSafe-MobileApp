@@ -1,4 +1,5 @@
 class VehicleModel {
+  final int id;
   final String brand;
   final String model;
   final int maximumSpeed;
@@ -15,6 +16,7 @@ class VehicleModel {
   final int ownerId;
 
   VehicleModel({
+    required this.id,
     required this.brand,
     required this.model,
     required this.maximumSpeed,
@@ -33,6 +35,7 @@ class VehicleModel {
 
   factory VehicleModel.fromJson(Map<String, dynamic> json) {
     return VehicleModel(
+      id: json['Id'],
       brand: json['Brand'],
       model: json['Model'],
       maximumSpeed: json['MaximumSpeed'],
@@ -52,6 +55,7 @@ class VehicleModel {
 
   Map<String, dynamic> toJson() {
     return {
+      'Id': id,
       'Brand': brand,
       'Model': model,
       'MaximumSpeed': maximumSpeed,
