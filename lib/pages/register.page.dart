@@ -49,8 +49,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
     if (_passwordController.text != _confirmPasswordController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Las contraseñas no son iguales.'),
-          backgroundColor: Colors.red,),
+        SnackBar(content: Text('Las contraseñas no son iguales.'), backgroundColor: Colors.red),
       );
       return;
     }
@@ -67,21 +66,21 @@ class _RegisterPageState extends State<RegisterPage> {
 
     if (response.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Usuario registrado con éxito.'),
-            backgroundColor: Colors.greenAccent,));
+        SnackBar(content: Text('Usuario registrado con éxito.'), backgroundColor: Colors.greenAccent),
+      );
       Navigator.pushNamed(context, '/login');
     } else if (response.statusCode == 400) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Por favor asegúrate de llenar todos los datos.'),
-        backgroundColor: Colors.red,));
+        SnackBar(content: Text('Por favor asegúrate de llenar todos los datos.'), backgroundColor: Colors.red),
+      );
     } else if (response.statusCode == 409) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Este email ya está en uso.'),
-            backgroundColor: Colors.red));
+        SnackBar(content: Text('Este email ya está en uso.'), backgroundColor: Colors.red),
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Ha ocurrido un error al crear el usuario.'),
-            backgroundColor: Colors.red));
+        SnackBar(content: Text('Ha ocurrido un error al crear el usuario.'), backgroundColor: Colors.red),
+      );
     }
   }
 
@@ -90,14 +89,15 @@ class _RegisterPageState extends State<RegisterPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Registro de Usuario'),
+        backgroundColor: Colors.deepPurple,
       ),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Card(
-            elevation: 4.0,
+            elevation: 8.0, // Más sombra
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10.0),
+              borderRadius: BorderRadius.circular(15.0),
             ),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -105,6 +105,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   children: <Widget>[
+                    // Radio Buttons para seleccionar tipo de usuario
                     RadioListTile<String>(
                       title: const Text('Arrendatario'),
                       value: 'tenant',
@@ -125,65 +126,42 @@ class _RegisterPageState extends State<RegisterPage> {
                         });
                       },
                     ),
-                    TextField(
-                      controller: _nameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Nombre',
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _lastnameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Apellido',
-                      ),
-                    ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 20),
+                    _buildInputField(_nameController, 'Nombre'),
+                    const SizedBox(height: 12),
+                    _buildInputField(_lastnameController, 'Apellido'),
+                    const SizedBox(height: 12),
+                    // Campo de fecha de nacimiento con íconos
                     TextFormField(
                       controller: _birthDateController,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Fecha de Nacimiento',
+                        prefixIcon: Icon(Icons.calendar_today),
                       ),
                       readOnly: true,
                       onTap: () => _selectDate(context),
                     ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _phoneController,
-                      decoration: const InputDecoration(
-                        labelText: 'Número de Teléfono',
-                      ),
-                      keyboardType: TextInputType.phone,
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _gmailController,
-                      decoration: const InputDecoration(
-                        labelText: 'Gmail',
-                      ),
-                      keyboardType: TextInputType.emailAddress,
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _passwordController,
-                      decoration: const InputDecoration(
-                        labelText: 'Contraseña',
-                      ),
-                      obscureText: true,
-                    ),
-                    TextField(
-                      controller: _confirmPasswordController,
-                      decoration: const InputDecoration(
-                        labelText: 'Repetir Contraseña',
-                      ),
-                      obscureText: true,
-                    ),
+                    const SizedBox(height: 12),
+                    _buildInputField(_phoneController, 'Número de Teléfono', keyboardType: TextInputType.phone),
+                    const SizedBox(height: 12),
+                    _buildInputField(_gmailController, 'Gmail', keyboardType: TextInputType.emailAddress),
+                    const SizedBox(height: 12),
+                    _buildInputField(_passwordController, 'Contraseña', obscureText: true),
+                    _buildInputField(_confirmPasswordController, 'Repetir Contraseña', obscureText: true),
                     const SizedBox(height: 20),
+                    // Botón de registro
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: _register,
-                        child: const Text('Completar Registro'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.deepPurple, // Color del botón
+                          padding: const EdgeInsets.symmetric(vertical: 16.0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                        ),
+                        child: const Text('Completar Registro', style: TextStyle(fontSize: 16.0)),
                       ),
                     ),
                   ],
@@ -193,6 +171,24 @@ class _RegisterPageState extends State<RegisterPage> {
           ),
         ),
       ),
+    );
+  }
+
+  // Método reutilizable para los campos de texto
+  Widget _buildInputField(TextEditingController controller, String label, {TextInputType keyboardType = TextInputType.text, bool obscureText = false}) {
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+        filled: true,
+        fillColor: Colors.grey[200],
+        prefixIcon: Icon(keyboardType == TextInputType.phone ? Icons.phone : Icons.text_fields),
+      ),
+      keyboardType: keyboardType,
+      obscureText: obscureText,
     );
   }
 }

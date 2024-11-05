@@ -10,10 +10,7 @@ import '../services/rent.service.dart';
 class CarPage extends StatelessWidget {
   final Map<String, dynamic> vehicle;
 
-
   const CarPage({Key? key, required this.vehicle}) : super(key: key);
-
-
 
   String _buildImageUrl(String filename) {
     return '${Config.baseUrl}/api/File/Image/$filename';
@@ -30,7 +27,6 @@ class CarPage extends StatelessWidget {
     print('Vehicle ID: $vehicleId');
 
     final RentService _rentService = RentService();
-
 
     final rentResponse = await _rentService.postRent(
       status: 'Pending',
@@ -49,11 +45,12 @@ class CarPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('${vehicle['brand']}  ${vehicle['model']}'),
+        backgroundColor: Colors.black,
+        title: Text('${vehicle['brand']}  ${vehicle['model']}', style: TextStyle(color: Colors.white),),
         centerTitle: true,
         actions: <Widget>[
           IconButton(
-            icon: const Icon(Icons.account_circle),
+            icon: const Icon(Icons.account_circle, color: Colors.white),
             onPressed: () {
               Navigator.pushNamed(context, '/profile-page');
             },
@@ -71,22 +68,22 @@ class CarPage extends StatelessWidget {
               child: Image.asset('assets/images/Drive-Safe-Logo.png'),
             ),
             ListTile(
-              leading: const Icon(Icons.directions_car),
-              title: const Text('Find a car'),
+              leading: const Icon(Icons.directions_car, color: Colors.black),
+              title: const Text('Find a car', style: TextStyle(color: Colors.black)),
               onTap: () {
                 Navigator.pushNamed(context, '/find-car');
               },
             ),
             ListTile(
-              leading: const Icon(Icons.build),
-              title: const Text('Maintenance'),
+              leading: const Icon(Icons.build, color: Colors.black),
+              title: const Text('Maintenance', style: TextStyle(color: Colors.black)),
               onTap: () {
                 Navigator.pushNamed(context, '/maintenance');
               },
             ),
             ListTile(
-              leading: const Icon(Icons.request_page),
-              title: const Text('Requests'),
+              leading: const Icon(Icons.request_page, color: Colors.black),
+              title: const Text('Requests', style: TextStyle(color: Colors.black)),
               onTap: () {
                 Navigator.pushNamed(context, '/requests');
               },
@@ -107,6 +104,7 @@ class CarPage extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 22.0,
                     fontWeight: FontWeight.bold,
+                    color: Colors.black,
                   ),
                 ),
                 Container(
@@ -142,23 +140,23 @@ class CarPage extends StatelessWidget {
             const SizedBox(height: 24.0),
             const Text(
               'Car benefits',
-              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color: Colors.black),
             ),
             const SizedBox(height: 8.0),
-            Text('Top Speed: ${vehicle['maximumSpeed']} km/h'),
-            Text('Consume: ${vehicle['consumption']} L/100 km'),
+            Text('Top Speed: ${vehicle['maximumSpeed']} km/h', style: TextStyle(color: Colors.black)),
+            Text('Consume: ${vehicle['consumption']} L/100 km', style: TextStyle(color: Colors.black)),
             const SizedBox(height: 24.0),
             const Text(
               'Dimensions',
-              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color: Colors.black),
             ),
             const SizedBox(height: 8.0),
-            Text('Large/Widht/Height: ${vehicle['dimensions']} mm'),
-            Text('Weight: ${vehicle['weight']} kg'),
+            Text('Large/Widht/Height: ${vehicle['dimensions']} mm', style: TextStyle(color: Colors.black)),
+            Text('Weight: ${vehicle['weight']} kg', style: TextStyle(color: Colors.black)),
             const SizedBox(height: 24.0),
             const Text(
               'Owner',
-              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color: Colors.black),
             ),
             const SizedBox(height: 8.0),
             ListTile(
@@ -166,8 +164,8 @@ class CarPage extends StatelessWidget {
                 backgroundImage: NetworkImage(
                     vehicle['ownerImageUrl'] ?? 'https://via.placeholder.com/150'),
               ),
-              title: const Text('Full Name'),
-              subtitle: const Text('Calification'),
+              title: const Text('Full Name', style: TextStyle(color: Colors.black)),
+              subtitle: const Text('Calification', style: TextStyle(color: Colors.black)),
             ),
             Center(
               child: ElevatedButton(
@@ -178,6 +176,14 @@ class CarPage extends StatelessWidget {
                     pickUpPlace: vehicle['pickUpPlace'],
                   );
                 },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFFFF6F00),
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                ),
                 child: const Text('Apply for rental'),
               ),
             ),

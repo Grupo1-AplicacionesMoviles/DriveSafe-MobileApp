@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:drivesafe_mobile_application/services/user.service.dart';
 import 'package:flutter/material.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
@@ -54,49 +53,74 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFF5F5F5),
       appBar: AppBar(
-        title: const Text('DriveSafe'),
+        backgroundColor: Colors.black,
+        title: const Text('DriveSafe', style: TextStyle(color: Colors.white)),
+        elevation: 0,
       ),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Card(
-            elevation: 4.0,
+            elevation: 8.0,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10.0),
+              borderRadius: BorderRadius.circular(20.0),
             ),
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(24.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   TextField(
                     controller: _gmailController,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Gmail',
+                      labelStyle: TextStyle(color: Colors.black),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Color(0xFFFF6F00), width: 2),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey, width: 1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  TextField(
-                    controller: _passwordController,
-                    decoration: const InputDecoration(
-                      labelText: 'Password',
-                    ),
-                    obscureText: true,
                   ),
                   const SizedBox(height: 20),
+                  TextField(
+                    controller: _passwordController,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      labelStyle: TextStyle(color: Colors.black),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Color(0xFFFF6F00), width: 2),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey, width: 1),
+                        borderRadius: BorderRadius.circular(10),
+                      )
+                    ),
+                  ),
+                  const SizedBox(height: 30),
                   SizedBox (
                     width: double.infinity,
                     child: ElevatedButton(
                         onPressed: _login,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black,
+                          backgroundColor: Color(0xFFFF6F00),
                           foregroundColor: Colors.white,
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
                         ),
-                        child: const Text('Login')
+                        child: const Text('Login', style: TextStyle(fontSize: 18)),
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 20),
                   Align(
                     alignment: Alignment.centerLeft,
                     child: InkWell(
@@ -107,12 +131,13 @@ class _LoginPageState extends State<LoginPage> {
                           'Forgot password?',
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
+                              color: Color(0xFFFF6F00),
                               decoration: TextDecoration.underline
                           ),
-                          overflow: TextOverflow.ellipsis
                       ),
                     ),
                   ),
+                  const SizedBox(height: 10),
                   Align(
                     alignment: Alignment.centerLeft,
                     child: InkWell(
@@ -123,9 +148,9 @@ class _LoginPageState extends State<LoginPage> {
                           'Create an account',
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
+                              color: Color(0xFFFF6F00),
                               decoration: TextDecoration.underline
                           ),
-                          overflow: TextOverflow.ellipsis
                       ),
                     ),
                   )

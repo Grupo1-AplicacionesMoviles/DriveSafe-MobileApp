@@ -42,6 +42,7 @@ class _HomeTenantState extends State<HomeTenant> {
     return Scaffold(
       appBar: AppBar(
         title: const Center(child: Text('Home')),
+        backgroundColor: Colors.black,
         leading: Builder(
           builder: (context) => IconButton(
             icon: const Icon(Icons.menu),
@@ -60,6 +61,7 @@ class _HomeTenantState extends State<HomeTenant> {
         ],
       ),
       drawer: Drawer(
+        backgroundColor: Colors.grey,
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
@@ -70,22 +72,22 @@ class _HomeTenantState extends State<HomeTenant> {
               child: Image.asset('assets/images/Drive-Safe-Logo.png'),
             ),
             ListTile(
-              leading: const Icon(Icons.directions_car),
-              title: const Text('Find a car'),
+              leading: const Icon(Icons.directions_car, color: Colors.white),
+              title: const Text('Find a car', style: TextStyle(color: Colors.white)),
               onTap: () {
                 Navigator.pushNamed(context, '/find-car');
               },
             ),
             ListTile(
-              leading: const Icon(Icons.build),
-              title: const Text('Maintenance'),
+              leading: const Icon(Icons.build, color: Colors.white),
+              title: const Text('Maintenance', style: TextStyle(color: Colors.white)),
               onTap: () {
                 Navigator.pushNamed(context, '/maintenance');
               },
             ),
             ListTile(
-              leading: const Icon(Icons.request_page),
-              title: const Text('Requests'),
+              leading: const Icon(Icons.request_page, color: Colors.white),
+              title: const Text('Requests', style: TextStyle(color: Colors.white)),
               onTap: () {
                 Navigator.pushNamed(context, '/requests');
               },
@@ -101,6 +103,10 @@ class _HomeTenantState extends State<HomeTenant> {
           final imageUrl = _buildImageUrl(vehicle.urlImage);
           return Card(
             margin: const EdgeInsets.symmetric(vertical: 8.0),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15.0),
+            ),
+            elevation: 4.0,
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Row(
@@ -114,6 +120,7 @@ class _HomeTenantState extends State<HomeTenant> {
                           style: const TextStyle(
                             fontSize: 18.0,
                             fontWeight: FontWeight.bold,
+                            color: Colors.black,
                           ),
                         ),
                         const SizedBox(height: 8.0),
@@ -121,6 +128,7 @@ class _HomeTenantState extends State<HomeTenant> {
                           vehicle.model,
                           style: const TextStyle(
                             fontSize: 16.0,
+                            color: Colors.black87,
                           ),
                         ),
                       ],
@@ -130,9 +138,12 @@ class _HomeTenantState extends State<HomeTenant> {
                     SizedBox(
                       width: 100,
                       height: 100,
-                      child: Image.network(
-                        imageUrl,
-                        fit: BoxFit.cover,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10.0),
+                          child: Image.network(
+                            imageUrl,
+                            fit: BoxFit.cover,
+                          ),
                       ),
                     ),
                 ],
