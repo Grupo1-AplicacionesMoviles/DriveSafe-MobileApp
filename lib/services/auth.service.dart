@@ -51,7 +51,7 @@ class AuthService {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = response.body.replaceAll('"', '');
     await prefs.setString('token', token);
-
+    await prefs.setString('password', password);
     return response;
   }
 

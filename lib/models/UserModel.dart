@@ -1,11 +1,11 @@
 class UserModel {
-  final String name;
-  final String lastName;
-  final String birthDate;
-  final int cellphone;
-  final String gmail;
-  final String password;
-  final String type;
+  String name;
+  String lastName;
+  String birthDate;
+  int cellphone;
+  String gmail;
+  String password;
+  String type;
 
   UserModel({required this.name,
     required this.lastName,
