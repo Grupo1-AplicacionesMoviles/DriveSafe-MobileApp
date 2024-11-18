@@ -13,6 +13,7 @@ class RegisterPage extends StatefulWidget {
 class _RegisterPageState extends State<RegisterPage> {
   final AuthService authService = AuthService();
   String _userType = '';
+  String _termsAndConditions = 'no';
   DateTime? _selectedDate;
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _lastnameController = TextEditingController();
@@ -84,6 +85,33 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
+  void _showTermsAndConditionsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Términos y Condiciones'),
+          content: const SingleChildScrollView(
+            child: Text(
+              'Bienvenido a nuestra aplicación móvil de renta de automóviles (en adelante, la "Aplicación"). '
+                  'Antes de utilizar nuestros servicios, es importante que lea detenidamente los presentes '
+                  'Términos y Condiciones. Al descargar, acceder o utilizar la Aplicación, usted acepta estar sujeto a los '
+                  'términos establecidos a continuación. Si no está de acuerdo con estos términos, no utilice la Aplicación. ',
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Aceptar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -149,6 +177,33 @@ class _RegisterPageState extends State<RegisterPage> {
                     _buildInputField(_passwordController, 'Contraseña', obscureText: true),
                     _buildInputField(_confirmPasswordController, 'Repetir Contraseña', obscureText: true),
                     const SizedBox(height: 20),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: InkWell(
+                        onTap: (){
+                          _showTermsAndConditionsDialog(context);
+                        },
+                        child: const Text(
+                          'Leer Términos y Condiciones',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFFFF6F00),
+                              decoration: TextDecoration.underline,
+                              fontSize: 18
+                          ),
+                        ),
+                      ),
+                    ),
+                    RadioListTile<String>(
+                      title: const Text('Acepto los Términos y Condiciones'),
+                      value: 'si',
+                      groupValue: _termsAndConditions,
+                      onChanged: (value) {
+                        setState(() {
+                          _termsAndConditions = value!;
+                        });
+                      },
+                    ),
                     // Botón de registro
                     SizedBox(
                       width: double.infinity,
