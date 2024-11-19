@@ -19,6 +19,33 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _gmailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+  Future<void> _showErrorDialog(String message) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Login Failed'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(message),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> _login() async {
     String gmail = _gmailController.text;
     String password = _passwordController.text;
@@ -29,7 +56,6 @@ class _LoginPageState extends State<LoginPage> {
     );
 
     if (responseLogin.statusCode == 200) {
-
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('token');
       Map<String, dynamic> decodedToken = JwtDecoder.decode(token!);
@@ -40,13 +66,12 @@ class _LoginPageState extends State<LoginPage> {
       UserModel user = UserModel.fromJson(jsonDecode(responseUser.body));
       String role = user.type;
 
-      print('role: '+ role);
       if (role == "owner")
         Navigator.pushNamed(context, '/home-owner');
       else
-      Navigator.pushNamed(context, '/home-tenant');
+        Navigator.pushNamed(context, '/home-tenant');
     } else {
-      print('Login failed: ${responseLogin.body}');
+      _showErrorDialog('The entered data is incorrect.');
     }
   }
 
