@@ -96,7 +96,10 @@ class _RegisterPageState extends State<RegisterPage> {
               'Bienvenido a nuestra aplicación móvil de renta de automóviles (en adelante, la "Aplicación"). '
                   'Antes de utilizar nuestros servicios, es importante que lea detenidamente los presentes '
                   'Términos y Condiciones. Al descargar, acceder o utilizar la Aplicación, usted acepta estar sujeto a los '
-                  'términos establecidos a continuación. Si no está de acuerdo con estos términos, no utilice la Aplicación. ',
+                  'términos establecidos a continuación. Si no está de acuerdo con estos términos, no utilice la Aplicación. \n'
+                  '1. La Aplicación está diseñada para facilitar el alquiler de vehículos entre arrendadores y arrendatarios, promoviendo la seguridad, confianza y transparencia en las transacciones.\n'
+                  '2. Para utilizar la Aplicación, debe ser mayor de edad según la legislación de su país y contar con una licencia de conducir válida (en caso de arrendar un vehículo).\n'
+                  '3. El usuario es responsable de proporcionar información veraz, completa y actualizada al registrarse y al utilizar los servicios de la Aplicación.\n',
             ),
           ),
           actions: <Widget>[
