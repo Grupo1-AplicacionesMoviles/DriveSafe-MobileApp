@@ -70,7 +70,7 @@ class HomeOwner extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     const Text(
-                      'Lorem Ipsum',
+                      'Search Notifications',
                       style: TextStyle(
                         fontSize: 24.0,
                         fontWeight: FontWeight.bold,
@@ -89,7 +89,7 @@ class HomeOwner extends StatelessWidget {
                         const SizedBox(width: 8.0),
                         ElevatedButton(
                           onPressed: () {},
-                          child: const Text('Share your car'),
+                          child: const Text('Search'),
                         ),
                       ],
                     ),
@@ -128,7 +128,7 @@ class HomeOwner extends StatelessWidget {
                               ),
                               SizedBox(height: 8.0),
                               Text(
-                                'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+                                'Solicitud de renta de vehículo.',
                                 style: TextStyle(
                                   fontSize: 16.0,
                                 ),
