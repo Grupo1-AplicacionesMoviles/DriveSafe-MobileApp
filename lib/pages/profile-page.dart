@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:drivesafe_mobile_application/pages/login.page.dart';
 import 'package:flutter/material.dart';
 import 'package:drivesafe_mobile_application/services/user.service.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
@@ -46,6 +47,17 @@ class _ProfileState extends State<ProfilePage> {
     } catch (e) {
       print("Error en la carga de datos: $e");
     }
+  }
+
+  Future<void> logout() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token');
+    await prefs.remove('password');
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => LoginPage()),
+    );
   }
 
   void showEditDialog(String field, String currentValue) {
@@ -292,7 +304,26 @@ class _ProfileState extends State<ProfilePage> {
                       ),
                   ),
                 ],
-              )
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: logout,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                      child: const Text("Cerrar sesión"),
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
         ),

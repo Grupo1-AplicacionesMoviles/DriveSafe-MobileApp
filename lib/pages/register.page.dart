@@ -117,7 +117,7 @@ class _RegisterPageState extends State<RegisterPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Registro de Usuario'),
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: Colors.black,
       ),
       body: Center(
         child: Padding(
@@ -210,7 +210,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       child: ElevatedButton(
                         onPressed: _register,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.deepPurple, // Color del botón
+                          backgroundColor: Colors.orange,
                           padding: const EdgeInsets.symmetric(vertical: 16.0),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10.0),
